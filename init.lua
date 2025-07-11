@@ -161,6 +161,12 @@ vim.o.cursorline = true
 -- Minimal number of screen lines to keep above and below the cursor.
 vim.o.scrolloff = 10
 
+-- Default indentation settings (guess-indent will override these when it detects the file's indentation)
+-- vim.o.expandtab = true -- Use spaces instead of tabs
+-- vim.o.tabstop = 4 -- Number of spaces that a tab counts for
+-- vim.o.shiftwidth = 4 -- Number of spaces to use for each step of (auto)indent
+-- vim.o.softtabstop = 4 -- Number of spaces that a tab counts for while editing
+
 -- if performing an operation that would fail due to unsaved changes in the buffer (like `:q`),
 -- instead raise a dialog asking if you wish to save the current file(s)
 -- See `:help 'confirm'`
@@ -247,7 +253,26 @@ rtp:prepend(lazypath)
 -- NOTE: Here is where you install your plugins.
 require('lazy').setup({
   -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
-  'NMAC427/guess-indent.nvim', -- Detect tabstop and shiftwidth automatically
+  -- Detect tabstop and shiftwidth automatically
+  {
+    'NMAC427/guess-indent.nvim',
+    config = function()
+      require('guess-indent').setup {
+        auto_cmd = true, -- Automatically run on BufEnter
+        override_editorconfig = false, -- Don't override .editorconfig settings
+        filetype_exclude = { -- Filetypes to exclude
+          'netrw',
+          'tutor',
+        },
+        buftype_exclude = { -- Buffer types to exclude
+          'help',
+          'nofile',
+          'terminal',
+          'prompt',
+        },
+      }
+    end,
+  },
 
   -- NOTE: Plugins can also be added by using a table,
   -- with the first argument being the link and the following
@@ -820,6 +845,7 @@ require('lazy').setup({
   --  Here are some example plugins that I've included in the Kickstart repository.
   --  Uncomment any of the lines below to enable them (you will need to restart nvim).
   --
+  { import = 'kickstart.plugins' },
   -- require 'kickstart.plugins.debug',
   -- require 'kickstart.plugins.indent_line',
   -- require 'kickstart.plugins.lint',
