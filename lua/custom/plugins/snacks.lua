@@ -13,7 +13,50 @@ return {
       enabled = true,
       timeout = 3000,
     },
-    picker = { enabled = true },
+    picker = {
+      win = {
+        input = {
+          keys = {
+            ['<a-s>'] = { 'flash', mode = { 'n', 'i' } },
+            ['s'] = { 'flash' },
+          },
+        },
+      },
+      actions = {
+        flash = function(picker)
+          local ok, flash = pcall(require, 'flash')
+          if not ok then
+            vim.notify('Flash plugin not found', vim.log.levels.WARN)
+            return
+          end
+          
+          local success, err = pcall(function()
+            flash.jump {
+              pattern = '^',
+              label = { after = { 0, 0 } },
+              search = {
+                mode = 'search',
+                exclude = {
+                  function(win)
+                    return vim.bo[vim.api.nvim_win_get_buf(win)].filetype ~= 'snacks_picker_list'
+                  end,
+                },
+              },
+              action = function(match)
+                local idx = picker.list:row2idx(match.pos[1])
+                if idx then
+                  picker.list:_move(idx, true, true)
+                end
+              end,
+            }
+          end)
+          
+          if not success and err then
+            vim.notify('Flash error: ' .. tostring(err), vim.log.levels.ERROR)
+          end
+        end,
+      },
+    },
     quickfile = { enabled = true },
     scope = { enabled = true },
     scroll = { enabled = true },

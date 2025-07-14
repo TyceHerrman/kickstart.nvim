@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__toolbase-proxy__context7_resolve-library-id",
+      "mcp__toolbase-proxy__context7_get-library-docs",
+      "WebFetch(domain:github.com)"
+    ],
+    "deny": []
+  }
+}
