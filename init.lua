@@ -565,6 +565,19 @@ require('lazy').setup({
       --  - settings (table): Override the default settings passed when initializing the server.
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
       local servers = {
+        dockerls = {
+          -- turn telemetry off from the very first packet
+          init_options = { telemetry = 'off' },
+
+          -- belt-and-braces: stay opted-out if the client later reloads settings
+          settings = {
+          ['docker.lsp'] = { telemetry = 'off' },
+          },
+        emmylua_ls = {},
+
+        -- only needed when Neovim can’t find the binary on $PATH
+        -- cmd = { vim.fn.expand('~/.local/share/mise/shims/docker-language-server'), 'start', '--stdio' },
+        },
         -- clangd = {},
         -- gopls = {},
         -- pyright = {},
@@ -810,7 +823,7 @@ require('lazy').setup({
   --  Uncomment any of the lines below to enable them (you will need to restart nvim).
   --
   { import = 'kickstart.plugins' },
-  -- require 'kickstart.plugins.debug',
+  require 'kickstart.plugins.debug',
   -- require 'kickstart.plugins.indent_line',
   require 'kickstart.plugins.lint',
   require 'kickstart.plugins.autopairs',
