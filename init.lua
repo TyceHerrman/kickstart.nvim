@@ -400,11 +400,6 @@ require('lazy').setup({
     -- Main LSP Configuration
     'neovim/nvim-lspconfig',
     dependencies = {
-      -- Automatically install LSPs and related tools to stdpath for Neovim
-
-      -- Useful status updates for LSP.
-      { 'j-hui/fidget.nvim', opts = {} },
-
       -- Allows extra capabilities provided by blink.cmp
       'saghen/blink.cmp',
     },
@@ -565,6 +560,22 @@ require('lazy').setup({
       --  - settings (table): Override the default settings passed when initializing the server.
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
       local servers = {
+        vtsls = {
+          filetypes = { 'typescript', 'javascript', 'javascriptreact', 'typescriptreact', 'vue' },
+          settings = {
+            vtsls = {
+              tsserver = {
+                globalPlugins = {{
+                  name = '@vue/typescript-plugin',
+                  languages = { 'vue' },
+                  configNamespace = 'typescript',
+                  location = vim.fn.stdpath('data') .. "/mason/packages/vue-language-server/node_modules/@vue/language-server",
+                }},
+              },
+            },
+          },
+        },
+        vue_ls = {},
         dockerls = {
           -- turn telemetry off from the very first packet
           init_options = { telemetry = 'off' },

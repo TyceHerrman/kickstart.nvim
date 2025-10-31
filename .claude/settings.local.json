@@ -4,7 +4,10 @@
       "Bash(grep:*)",
       "Bash(nvim:*)",
       "Bash(ls:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "WebFetch(domain:www.reddit.com)",
+      "WebFetch(domain:github.com)",
+      "mcp__MCP_DOCKER__sequentialthinking"
     ],
     "deny": []
   }

@@ -7,7 +7,19 @@ return {
     bigfile = { enabled = true },
     dashboard = { enabled = true },
     explorer = { enabled = true },
-    indent = { enabled = true },
+    indent = {
+      enabled = true,
+      hl = {
+        "SnacksIndent1",
+        "SnacksIndent2",
+        "SnacksIndent3",
+        "SnacksIndent4",
+        "SnacksIndent5",
+        "SnacksIndent6",
+        "SnacksIndent7",
+        "SnacksIndent8",
+      },
+    },
     input = { enabled = true },
     notifier = {
       enabled = true,
@@ -29,7 +41,7 @@ return {
             vim.notify('Flash plugin not found', vim.log.levels.WARN)
             return
           end
-          
+
           local success, err = pcall(function()
             flash.jump {
               pattern = '^',
@@ -50,7 +62,7 @@ return {
               end,
             }
           end)
-          
+
           if not success and err then
             vim.notify('Flash error: ' .. tostring(err), vim.log.levels.ERROR)
           end
@@ -556,6 +568,32 @@ return {
     },
   },
   init = function()
+    local colors = {
+      "#ff79c6", -- Pink
+      "#8be9fd", -- Cyan
+      "#50fa7b", -- Green
+      "#f1fa8c", -- Yellow
+      "#bd93f9", -- Purple
+      "#ffb86c", -- Orange
+      "#ff5555", -- Red
+      "#6272a4", -- Comment (bluish-gray)
+    }
+
+    -- Create autocmd to set colors on colorscheme changes
+    vim.api.nvim_create_autocmd("ColorScheme", {
+      group = vim.api.nvim_create_augroup("SnacksIndentRainbow", { clear = true }),
+      callback = function()
+        for i, color in ipairs(colors) do
+          vim.api.nvim_set_hl(0, "SnacksIndent" .. i, { fg = color })
+        end
+      end,
+    })
+
+    -- Set colors immediately
+    for i, color in ipairs(colors) do
+      vim.api.nvim_set_hl(0, "SnacksIndent" .. i, { fg = color })
+    end
+
     vim.api.nvim_create_autocmd('User', {
       pattern = 'VeryLazy',
       callback = function()
