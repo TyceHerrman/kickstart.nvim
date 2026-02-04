@@ -4,11 +4,18 @@ return {
   lazy = false,
   ---@type snacks.Config
   opts = {
+    -- ═══════════════════════════════════════════════════════════
+    -- Core Features
+    -- ═══════════════════════════════════════════════════════════
     bigfile = { enabled = true },
     dashboard = { enabled = true },
-    explorer = { enabled = true },
+    explorer = { enabled = true }, -- File browser (use <leader>e, coexists with Yazi for different workflows)
+
+    -- ═══════════════════════════════════════════════════════════
+    -- UI Features
+    -- ═══════════════════════════════════════════════════════════
     indent = {
-      enabled = true,
+      enabled = false,
       hl = {
         "SnacksIndent1",
         "SnacksIndent2",
@@ -25,6 +32,11 @@ return {
       enabled = true,
       timeout = 3000,
     },
+
+    -- ═══════════════════════════════════════════════════════════
+    -- Integration Features (Git & Pickers)
+    -- ═══════════════════════════════════════════════════════════
+    gh = {},
     picker = {
       win = {
         input = {
@@ -68,18 +80,35 @@ return {
           end
         end,
       },
+      sources = {
+        gh_issue = {},
+        gh_pr = {}
+      }
     },
+
+    -- ═══════════════════════════════════════════════════════════
+    -- Additional Features
+    -- ═══════════════════════════════════════════════════════════
     quickfile = { enabled = true },
     scope = { enabled = true },
     scroll = { enabled = true },
     statuscolumn = { enabled = true },
     words = { enabled = true },
+
+    -- ═══════════════════════════════════════════════════════════
+    -- Styles & Appearance
+    -- ═══════════════════════════════════════════════════════════
     styles = {
       notification = {
         -- wo = { wrap = true } -- Wrap notifications
       },
     },
   },
+
+  -- ═══════════════════════════════════════════════════════════
+  -- Keybindings & Lazy Setup
+  -- Includes keymaps and autocmds for setting up Snacks features
+  -- ═══════════════════════════════════════════════════════════
   keys = {
     -- Top Pickers & Explorer
     {
@@ -216,6 +245,35 @@ return {
         Snacks.picker.git_log_file()
       end,
       desc = 'Git Log File',
+    },
+    -- GitHub
+    {
+      '<leader>gi',
+      function()
+        Snacks.gh.issue()
+      end,
+      desc = 'GitHub Issues',
+    },
+    {
+      '<leader>gI',
+      function()
+        Snacks.gh.issue { state = 'all' }
+      end,
+      desc = 'GitHub Issues (All)',
+    },
+    {
+      '<leader>gp',
+      function()
+        Snacks.gh.pr()
+      end,
+      desc = 'GitHub PRs',
+    },
+    {
+      '<leader>gP',
+      function()
+        Snacks.gh.pr { state = 'all' }
+      end,
+      desc = 'GitHub PRs (All)',
     },
     -- Grep
     {

@@ -1,11 +1,12 @@
 return {
   'stevearc/aerial.nvim',
+  event = { 'BufReadPost', 'BufNewFile' },
   dependencies = {
     'nvim-treesitter/nvim-treesitter',
     'nvim-tree/nvim-web-devicons',
   },
   keys = {
-    { '<leader>ta', '<cmd>AerialToggle<CR>', desc = '[T]oggle [A]erial' },
+    { '<leader>a', '<cmd>AerialToggle<CR>', desc = 'Toggle [A]erial' },
     {
       '<leader>fs',
       function()
@@ -13,6 +14,7 @@ return {
       end,
       desc = 'Find Symbols',
     },
+    { '<leader>ds', '<cmd>call aerial#fzf()<CR>', desc = 'Aerial FZF' },
   },
   opts = {},
 }
