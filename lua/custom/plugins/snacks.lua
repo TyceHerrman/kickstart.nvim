@@ -8,7 +8,7 @@ return {
     -- Core Features
     -- ═══════════════════════════════════════════════════════════
     bigfile = { enabled = true },
-    dashboard = { enabled = true },
+    dashboard = { enabled = not vim.tbl_contains(vim.v.argv, '--listen') },
     explorer = { enabled = true }, -- File browser (use <leader>e, coexists with Yazi for different workflows)
 
     -- ═══════════════════════════════════════════════════════════
@@ -30,7 +30,7 @@ return {
     input = { enabled = true },
     notifier = {
       enabled = true,
-      timeout = 3000,
+      timeout = 7000,
     },
 
     -- ═══════════════════════════════════════════════════════════

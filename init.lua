@@ -157,6 +157,8 @@ vim.opt.cmdheight = 2
 
 vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
 
+vim.opt.conceallevel = 2
+
 -- Preview substitutions live, as you type!
 vim.o.inccommand = 'split'
 
@@ -235,6 +237,24 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   desc = 'Highlight when yanking (copying) text',
   group = vim.api.nvim_create_augroup('kickstart-highlight-yank', { clear = true }),
   callback = function() vim.hl.on_yank() end,
+})
+
+-- Custom line number colors (Dracula dark_fg grey with green cursor line)
+vim.api.nvim_create_autocmd('ColorScheme', {
+  desc = 'Custom line number colors',
+  group = vim.api.nvim_create_augroup('custom-line-numbers', { clear = true }),
+  callback = function()
+    vim.api.nvim_set_hl(0, 'LineNr', { fg = '#CECFCC' })
+    vim.api.nvim_set_hl(0, 'CursorLineNr', { fg = '#ff79c6', bold = true })
+  end,
+})
+
+-- Reset conceallevel for JSON files (concealing breaks readability)
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = { 'json', 'jsonc' },
+  callback = function()
+    vim.opt_local.conceallevel = 0
+  end,
 })
 
 -- [[ Install `lazy.nvim` plugin manager ]]
@@ -325,9 +345,6 @@ require('lazy').setup({
     -- Main LSP Configuration
     'neovim/nvim-lspconfig',
     dependencies = {
-      -- Useful status updates for LSP.
-      { 'j-hui/fidget.nvim', opts = {} },
-
       -- Allows extra capabilities provided by blink.cmp
       'saghen/blink.cmp',
     },
@@ -561,7 +578,7 @@ require('lazy').setup({
         -- <c-k>: Toggle signature help
         --
         -- See :h blink-cmp-config-keymap for defining your own keymap
-        preset = 'default',
+        preset = 'super-tab',
 
         -- For more advanced Luasnip keymaps (e.g. selecting choice nodes, expansion) see:
         --    https://github.com/L3MON4D3/LuaSnip?tab=readme-ov-file#keymaps
@@ -577,6 +594,8 @@ require('lazy').setup({
         -- By default, you may press `<c-space>` to show the documentation.
         -- Optionally, set `auto_show = true` to show the documentation after a delay.
         documentation = { auto_show = false, auto_show_delay_ms = 500 },
+        list = { selection = { preselect = true, auto_insert = false } },
+        ghost_text = { enabled = true },
       },
 
       sources = {
