@@ -6,6 +6,8 @@
 -- be extended to other languages as well. That's why it's called
 -- kickstart.nvim and not kitchen-sink.nvim ;)
 
+---@module 'lazy'
+---@type LazySpec
 return {
   -- NOTE: Yes, you can install new plugins here!
   'mfussenegger/nvim-dap',
@@ -31,36 +33,12 @@ return {
   },
   keys = {
     -- Basic debugging keymaps, feel free to change to your liking!
-    {
-      '<F5>',
-      function() require('dap').continue() end,
-      desc = 'Debug: Start/Continue',
-    },
-    {
-      '<F1>',
-      function() require('dap').step_into() end,
-      desc = 'Debug: Step Into',
-    },
-    {
-      '<F2>',
-      function() require('dap').step_over() end,
-      desc = 'Debug: Step Over',
-    },
-    {
-      '<F3>',
-      function() require('dap').step_out() end,
-      desc = 'Debug: Step Out',
-    },
-    {
-      '<leader>b',
-      function() require('dap').toggle_breakpoint() end,
-      desc = 'Debug: Toggle Breakpoint',
-    },
-    {
-      '<leader>B',
-      function() require('dap').set_breakpoint(vim.fn.input 'Breakpoint condition: ') end,
-      desc = 'Debug: Set Breakpoint',
-    },
+    { '<F5>', function() require('dap').continue() end, desc = 'Debug: Start/Continue' },
+    { '<F1>', function() require('dap').step_into() end, desc = 'Debug: Step Into' },
+    { '<F2>', function() require('dap').step_over() end, desc = 'Debug: Step Over' },
+    { '<F3>', function() require('dap').step_out() end, desc = 'Debug: Step Out' },
+    { '<leader>b', function() require('dap').toggle_breakpoint() end, desc = 'Debug: Toggle Breakpoint' },
+    { '<leader>B', function() require('dap').set_breakpoint(vim.fn.input 'Breakpoint condition: ') end, desc = 'Debug: Set Breakpoint' },
     -- Toggle to see last session result. Without this, you can't see session output in case of unhandled exception.
     {
       '<F7>',
@@ -79,6 +57,7 @@ return {
       --    Feel free to remove or use ones that you like more! :)
       --    Don't feel like these are good choices.
       icons = { expanded = '▾', collapsed = '▸', current_frame = '*' },
+      ---@diagnostic disable-next-line: missing-fields
       controls = {
         icons = {
           pause = '⏸',
