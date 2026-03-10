@@ -14,7 +14,6 @@ return {
       end,
       desc = 'Find Symbols',
     },
-    { '<leader>ds', '<cmd>call aerial#fzf()<CR>', desc = 'Aerial FZF' },
   },
   opts = {},
 }
