@@ -257,6 +257,19 @@ vim.api.nvim_create_autocmd('FileType', {
   end,
 })
 
+-- Disable mini.trailspace on snacks dashboard. mini.trailspace leaves a
+-- window-local matchadd from the initial buffer, and snacks suppresses events
+-- (ei="all") when switching to the dashboard buffer so it never gets cleared.
+vim.api.nvim_create_autocmd('User', {
+  pattern = 'SnacksDashboardOpened',
+  callback = function()
+    vim.b.minitrailspace_disable = true
+    if _G.MiniTrailspace then
+      _G.MiniTrailspace.unhighlight()
+    end
+  end,
+})
+
 -- [[ Install `lazy.nvim` plugin manager ]]
 --    See `:help lazy.nvim.txt` or https://github.com/folke/lazy.nvim for more info
 local lazypath = vim.fn.stdpath 'data' .. '/lazy/lazy.nvim'
