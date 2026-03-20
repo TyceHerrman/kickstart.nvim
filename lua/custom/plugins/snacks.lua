@@ -8,7 +8,8 @@ return {
     -- Core Features
     -- ═══════════════════════════════════════════════════════════
     bigfile = { enabled = true },
-    dashboard = { enabled = not vim.tbl_contains(vim.v.argv, '--listen') },
+    -- Topgrade headless runs must not wait on dashboard startup behavior.
+    dashboard = { enabled = not vim.g.is_topgrade_update and not vim.tbl_contains(vim.v.argv, '--listen') },
     explorer = { enabled = true }, -- File browser (use <leader>e, coexists with Yazi for different workflows)
 
     -- ═══════════════════════════════════════════════════════════

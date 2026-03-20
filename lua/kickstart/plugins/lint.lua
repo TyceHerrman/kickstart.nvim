@@ -16,24 +16,11 @@ return {
 
       -- Define linters for each filetype
       lint.linters_by_ft = {
-        markdown = { 'markdownlint' },
+        markdown = { 'rumdl' },
         -- Note: JavaScript/TypeScript linters are dynamically selected based on config files
         -- See get_linter_for_buffer() below for selection logic:
-        -- - eslint_d: if .eslintrc.* or package.json with eslintConfig exists
         -- - oxlint: if .oxlintrc.json exists
         -- - oxlint_typeaware: fallback if no config found
-      }
-
-      -- Config file markers for different linters
-      local eslint_configs = {
-        '.eslintrc.js',
-        '.eslintrc.cjs',
-        '.eslintrc.yaml',
-        '.eslintrc.yml',
-        '.eslintrc.json',
-        'eslint.config.js',
-        'eslint.config.mjs',
-        'eslint.config.cjs',
       }
 
       local oxlint_configs = {
@@ -47,26 +34,9 @@ return {
           return nil
         end
 
-        -- Check for ESLint config
-        if next(vim.fs.find(eslint_configs, { path = bufpath, upward = true })) then
-          return 'eslint_d'
-        end
-
         -- Check for oxlint config
         if next(vim.fs.find(oxlint_configs, { path = bufpath, upward = true })) then
           return 'oxlint'
-        end
-
-        -- Check package.json for eslintConfig
-        local package_json = vim.fs.find('package.json', { path = bufpath, upward = true })[1]
-        if package_json then
-          local ok, content = pcall(vim.fn.readfile, package_json)
-          if ok then
-            local package_str = table.concat(content, '\n')
-            if package_str:match('"eslintConfig"') then
-              return 'eslint_d'
-            end
-          end
         end
 
         -- No config found, use oxlint with type-aware defaults

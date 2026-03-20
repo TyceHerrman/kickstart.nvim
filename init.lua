@@ -198,6 +198,10 @@ vim.diagnostic.config {
 
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
 
+vim.api.nvim_create_user_command('LspLog', function()
+  vim.cmd.edit(vim.lsp.get_log_path())
+end, { desc = 'Open the LSP log file' })
+
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
 -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
 -- is not what someone will guess without a bit more experience.
@@ -269,6 +273,15 @@ vim.api.nvim_create_autocmd('User', {
     end
   end,
 })
+
+local topgrade = require('custom.topgrade')
+vim.g.is_topgrade_update = topgrade.is_update_session()
+
+if vim.g.is_topgrade_update then
+  -- Topgrade sources its update script after init.lua; rewrite the Lazy step so the
+  -- headless update runs asynchronously and exits on LazySync.
+  topgrade.prepare_update_session()
+end
 
 -- [[ Install `lazy.nvim` plugin manager ]]
 --    See `:help lazy.nvim.txt` or https://github.com/folke/lazy.nvim for more info
@@ -459,10 +472,69 @@ require('lazy').setup({
       -- Enable the following language servers
       --  Feel free to add/remove any LSPs that you want here. They will automatically be installed.
       --  See `:help lsp-config` for information about keys and how to configure
+      -- Apply blink.cmp capabilities to all LSP servers
+      vim.lsp.config('*', {
+        capabilities = require('blink.cmp').get_lsp_capabilities(),
+      })
+
+      -- Resolve Vue language server path for @vue/typescript-plugin (nix-aware)
+      local vue_ts_plugin_path
+      do
+        local vue_ls_bin = vim.fn.exepath('vue-language-server')
+        if vue_ls_bin ~= '' then
+          local resolved = vim.fn.resolve(vue_ls_bin)
+          local pkg_root = vim.fn.fnamemodify(resolved, ':h:h')
+          vue_ts_plugin_path = pkg_root .. '/lib/language-tools/packages/language-server'
+        end
+      end
+
       ---@type table<string, vim.lsp.Config>
       local servers = {
-        -- TypeScript/JavaScript now handled by typescript-tools.nvim
-        -- (see lua/custom/plugins/typescript-tools.lua)
+        -- TypeScript/JavaScript handled by vtsls (see vtsls entry below)
+        vtsls = {
+          filetypes = { 'typescript', 'javascript', 'typescriptreact', 'javascriptreact', 'vue' },
+          settings = {
+            vtsls = {
+              autoUseWorkspaceTsdk = true,
+              tsserver = {
+                globalPlugins = vue_ts_plugin_path and {
+                  {
+                    name = '@vue/typescript-plugin',
+                    location = vue_ts_plugin_path,
+                    languages = { 'vue' },
+                    configNamespace = 'typescript',
+                  },
+                } or {},
+              },
+            },
+            typescript = {
+              tsserver = {
+                maxTsServerMemory = 8192,
+                nodePath = vim.fn.exepath('node'),
+              },
+              inlayHints = {
+                parameterNames = { enabled = 'all' },
+                parameterTypes = { enabled = true },
+                variableTypes = { enabled = true },
+                propertyDeclarationTypes = { enabled = true },
+                functionLikeReturnTypes = { enabled = true },
+                enumMemberValues = { enabled = true },
+              },
+              updateImportsOnFileMove = { enabled = 'always' },
+            },
+            javascript = {
+              inlayHints = {
+                parameterNames = { enabled = 'all' },
+                parameterTypes = { enabled = true },
+                variableTypes = { enabled = true },
+                propertyDeclarationTypes = { enabled = true },
+                functionLikeReturnTypes = { enabled = true },
+                enumMemberValues = { enabled = true },
+              },
+              updateImportsOnFileMove = { enabled = 'always' },
+            },
+          },
+        },
         vue_ls = {},
         dockerls = {
           -- turn telemetry off from the very first packet
@@ -485,36 +557,6 @@ require('lazy').setup({
         -- But for many setups, the LSP (`ts_ls`) will work just fine
         -- ts_ls = {},
 
-        stylua = {}, -- Used to format Lua code
-
-        -- Special Lua Config, as recommended by neovim help docs
-        lua_ls = {
-          on_init = function(client)
-            if client.workspace_folders then
-              local path = client.workspace_folders[1].name
-              if path ~= vim.fn.stdpath 'config' and (vim.uv.fs_stat(path .. '/.luarc.json') or vim.uv.fs_stat(path .. '/.luarc.jsonc')) then return end
-            end
-
-            client.config.settings.Lua = vim.tbl_deep_extend('force', client.config.settings.Lua, {
-              runtime = {
-                version = 'LuaJIT',
-                path = { 'lua/?.lua', 'lua/?/init.lua' },
-              },
-              workspace = {
-                checkThirdParty = false,
-                -- NOTE: this is a lot slower and will cause issues when working on your own configuration.
-                --  See https://github.com/neovim/nvim-lspconfig/issues/3189
-                library = vim.tbl_extend('force', vim.api.nvim_get_runtime_file('', true), {
-                  '${3rd}/luv/library',
-                  '${3rd}/busted/library',
-                }),
-              },
-            })
-          end,
-          settings = {
-            Lua = {},
-          },
-        },
       }
 
       for name, server in pairs(servers) do
@@ -630,7 +672,7 @@ require('lazy').setup({
       -- the rust implementation via `'prefer_rust_with_warning'`
       --
       -- See :h blink-cmp-config-fuzzy for more information
-      fuzzy = { implementation = 'lua' },
+      fuzzy = { implementation = 'prefer_rust' },
 
       -- Shows a signature help window while you type arguments for a function
       signature = { enabled = true },
@@ -693,7 +735,10 @@ require('lazy').setup({
     branch = 'main',
     config = function()
       local parsers = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' }
-      require('nvim-treesitter').install(parsers)
+      -- Topgrade updates already run :TSUpdate through lazy.nvim and must exit unattended.
+      if not vim.g.is_topgrade_update then
+        require('nvim-treesitter').install(parsers)
+      end
       vim.api.nvim_create_autocmd('FileType', {
         callback = function(args)
           local buf, filetype = args.buf, args.match

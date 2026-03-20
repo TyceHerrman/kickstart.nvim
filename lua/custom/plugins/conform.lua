@@ -20,6 +20,7 @@ return {
     -- Define your formatters
     formatters_by_ft = {
       lua = { 'stylua' },
+      markdown = { 'rumdl' },
       python = { 'ruff_format' },  -- Changed from isort + black
       javascript = { 'biome' },     -- Changed from prettier
       typescript = { 'biome' },     -- Add TypeScript
