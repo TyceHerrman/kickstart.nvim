@@ -23,8 +23,14 @@ return {
       -- or disable with `vim.g.pairs = false` (global) and `vim.b.pairs = false` (per-buffer)
       -- and/or with `vim.g.blink_pairs = false` and `vim.b.blink_pairs = false`
       disabled_filetypes = {},
+      wrap = {
+        -- move closing pair via motion (dot-repeatable)
+        ['<C-b>'] = 'motion',
+        -- move opening pair via motion
+        ['<C-S-b>'] = 'motion_reverse',
+      },
       -- see the defaults:
-      -- https://github.com/Saghen/blink.pairs/blob/main/lua/blink/pairs/config/mappings.lua#L14
+      -- https://github.com/Saghen/blink.pairs/blob/main/lua/blink/pairs/config/mappings.lua
       pairs = {},
     },
     highlights = {
