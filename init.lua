@@ -720,10 +720,15 @@ require('lazy').setup({
       --
       -- Examples:
       --  - va)  - [V]isually select [A]round [)]paren
-      --  - yinq - [Y]ank [I]nside [N]ext [Q]uote
+      --  - yiiq - [Y]ank [I]nside next [Q]uote
       --  - ci'  - [C]hange [I]nside [']quote
       local spec_treesitter = require('mini.ai').gen_spec.treesitter
       require('mini.ai').setup {
+        -- NOTE: Avoid conflicts with the built-in incremental selection mappings on Neovim>=0.12 (see `:help treesitter-incremental-selection`)
+        mappings = {
+          around_next = 'aa',
+          inside_next = 'ii',
+        },
         n_lines = 500,
         custom_textobjects = {
           F = spec_treesitter { a = '@function.outer', i = '@function.inner' },
@@ -810,8 +815,12 @@ require('lazy').setup({
         -- vim.wo.foldexpr = 'v:lua.vim.treesitter.foldexpr()'
         -- vim.wo.foldmethod = 'expr'
 
+        -- check if treesitter indentation is available for this language, and if so enable it
+        -- in case there is no indent query, the indentexpr will fallback to the vim's built in one
+        local has_indent_query = vim.treesitter.query.get(language, 'indents') ~= nil
+
         -- enables treesitter based indentation
-        vim.bo[buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+        if has_indent_query then vim.bo[buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()" end
       end
 
       vim.api.nvim_create_autocmd('FileType', {
