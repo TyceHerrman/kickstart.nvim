@@ -12,6 +12,7 @@ spell/
 lazy-lock.json
 
 .DS_Store
+.serena/
 settings.local.json
 nvim.log
 docs/
