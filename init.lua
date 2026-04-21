@@ -359,6 +359,14 @@ require('lazy').setup({
         { '<leader>u', group = '[U]I/Toggle' },
         { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } },
         { 'gr', group = 'LSP Actions', mode = { 'n' } },
+        { 'a', group = 'Around textobject', mode = { 'x', 'o' } },
+        { 'aF', desc = 'Around function definition', mode = { 'x', 'o' } },
+        { 'aC', desc = 'Around class definition', mode = { 'x', 'o' } },
+        { 'ao', desc = 'Around block/loop/conditional', mode = { 'x', 'o' } },
+        { 'i', group = 'Inside textobject', mode = { 'x', 'o' } },
+        { 'iF', desc = 'Inside function definition', mode = { 'x', 'o' } },
+        { 'iC', desc = 'Inside class definition', mode = { 'x', 'o' } },
+        { 'io', desc = 'Inside block/loop/conditional', mode = { 'x', 'o' } },
       },
     },
   },
@@ -714,7 +722,18 @@ require('lazy').setup({
       --  - va)  - [V]isually select [A]round [)]paren
       --  - yinq - [Y]ank [I]nside [N]ext [Q]uote
       --  - ci'  - [C]hange [I]nside [']quote
-      require('mini.ai').setup { n_lines = 500 }
+      local spec_treesitter = require('mini.ai').gen_spec.treesitter
+      require('mini.ai').setup {
+        n_lines = 500,
+        custom_textobjects = {
+          F = spec_treesitter { a = '@function.outer', i = '@function.inner' },
+          C = spec_treesitter { a = '@class.outer', i = '@class.inner' },
+          o = spec_treesitter {
+            a = { '@conditional.outer', '@loop.outer', '@block.outer' },
+            i = { '@conditional.inner', '@loop.inner', '@block.inner' },
+          },
+        },
+      }
 
       -- Add/delete/replace surroundings (brackets, quotes, etc.)
       --
@@ -749,18 +768,40 @@ require('lazy').setup({
     build = ':TSUpdate',
     branch = 'main',
     config = function()
-      -- ensure basic parser are installed
-      local parsers = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' }
-      -- Topgrade updates already run :TSUpdate through lazy.nvim and must exit unattended.
-      if not vim.g.is_topgrade_update then
-        require('nvim-treesitter').install(parsers)
+      local nvim_treesitter = require 'nvim-treesitter'
+      local available_parsers = nvim_treesitter.get_available()
+      local warned_languages = {}
+      local ignored_filetypes = {
+        noice = true,
+        snacks_notif = true,
+        snacks_notif_history = true,
+        ["blink-cmp-menu"] = true,
+        ["blink-cmp-documentation"] = true,
+        ["blink-cmp-signature"] = true,
+      }
+
+      local function managed_parser_path(language)
+        return vim.fs.joinpath(vim.fn.stdpath 'data', 'site', 'parser', language .. '.so')
+      end
+
+      local function warn_missing_parser(language, message)
+        if warned_languages[language] then return end
+        warned_languages[language] = true
+        vim.notify(message, vim.log.levels.WARN, { title = 'Tree-sitter' })
       end
 
       ---@param buf integer
       ---@param language string
-      local function treesitter_try_attach(buf, language)
-        -- check if parser exists and load it
-        if not vim.treesitter.language.add(language) then return end
+      ---@param parser_path string
+      local function treesitter_try_attach(buf, language, parser_path)
+        if not vim.api.nvim_buf_is_valid(buf) then return end
+
+        local added, err = vim.treesitter.language.add(language, { path = parser_path })
+        if not added then
+          warn_missing_parser(language, string.format('Failed to load %s parser from %s: %s', language, parser_path, err or 'unknown error'))
+          return
+        end
+
         -- enables syntax highlighting and other treesitter features
         vim.treesitter.start(buf, language)
 
@@ -770,29 +811,46 @@ require('lazy').setup({
         -- vim.wo.foldmethod = 'expr'
 
         -- enables treesitter based indentation
-        vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+        vim.bo[buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
       end
 
-      local available_parsers = require('nvim-treesitter').get_available()
       vim.api.nvim_create_autocmd('FileType', {
         callback = function(args)
           local buf, filetype = args.buf, args.match
 
+          -- UI buffers manage their own rendering and should not trigger parser installs or warnings.
+          if ignored_filetypes[filetype] then return end
+
           local language = vim.treesitter.language.get_lang(filetype)
           if not language then return end
 
-          local installed_parsers = require('nvim-treesitter').get_installed 'parsers'
+          local parser_path = managed_parser_path(language)
 
-          if vim.tbl_contains(installed_parsers, language) then
-            -- enable the parser if it is installed
-            treesitter_try_attach(buf, language)
-          elseif vim.tbl_contains(available_parsers, language) then
-            -- if a parser is available in `nvim-treesitter` auto install it, and enable it after the installation is done
-            require('nvim-treesitter').install(language):await(function() treesitter_try_attach(buf, language) end)
-          else
-            -- try to enable treesitter features in case the parser exists but is not available from `nvim-treesitter`
-            treesitter_try_attach(buf, language)
+          if vim.uv.fs_stat(parser_path) then
+            treesitter_try_attach(buf, language, parser_path)
+            return
           end
+
+          if not vim.tbl_contains(available_parsers, language) then
+            warn_missing_parser(language, string.format('No nvim-treesitter parser is available for %s.', language))
+            return
+          end
+
+          -- Install into stdpath('data')/site so nvim-treesitter owns both parser and queries.
+          nvim_treesitter.install(language):await(function(err, success)
+            if err or not success then
+              warn_missing_parser(language, string.format('Failed to install %s via nvim-treesitter.', language))
+              return
+            end
+
+            local installed_parser_path = managed_parser_path(language)
+            if not vim.uv.fs_stat(installed_parser_path) then
+              warn_missing_parser(language, string.format('Installed %s, but no parser was found at %s.', language, installed_parser_path))
+              return
+            end
+
+            treesitter_try_attach(buf, language, installed_parser_path)
+          end)
         end,
       })
     end,
