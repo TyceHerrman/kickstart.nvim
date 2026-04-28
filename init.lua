@@ -757,6 +757,8 @@ require('lazy').setup({
 
       require('mini.misc').setup()
 
+      require('mini.icons').setup()
+
       require('mini.visits').setup()
 
       require('mini.map').setup()
