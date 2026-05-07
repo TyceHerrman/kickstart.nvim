@@ -84,6 +84,14 @@ I hope you enjoy your Neovim journey,
 P.S. You can delete this when you're done too. It's your config now! :)
 --]]
 
+-- ============================================================
+-- SECTION 1: FOUNDATION
+-- Core Neovim settings, leaders, options, basic keymaps, basic autocmds
+-- ============================================================
+
+-- Enable faster startup by caching compiled Lua modules
+vim.loader.enable()
+
 -- Set <space> as the leader key
 -- See `:help mapleader`
 --  NOTE: Must happen before plugins are loaded (otherwise wrong leader will be used)
@@ -193,7 +201,15 @@ vim.diagnostic.config {
   virtual_lines = false, -- Text shows up underneath the line, with virtual lines
 
   -- Auto open the float, so you can easily read the errors when jumping with `[d` and `]d`
-  jump = { float = true },
+  jump = {
+    on_jump = function(_, bufnr)
+      vim.diagnostic.open_float {
+        bufnr = bufnr,
+        scope = 'cursor',
+        focus = false,
+      }
+    end,
+  },
 }
 
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
@@ -273,8 +289,17 @@ vim.g.is_topgrade_update = topgrade.is_update_session()
 
 if vim.g.is_topgrade_update then topgrade.prepare_update_session() end
 
--- [[ Configure and install plugins ]]
---    See `:help vim.pack` for Neovim's built-in package manager.
+-- ============================================================
+-- SECTION 2: PLUGIN MANAGER INTRO
+-- vim.pack setup, update hooks, and local helper imports
+-- ============================================================
+
+-- [[ Intro to `vim.pack` ]]
+-- `vim.pack` is Neovim's built-in package manager.
+-- See `:help vim.pack`, `:help vim.pack-examples`, and `:help vim.pack-events`.
+-- Useful update commands:
+--   :lua vim.pack.update(nil, { offline = true })
+--   :lua vim.pack.update()
 local pack = require 'custom.pack'
 local gh = pack.gh
 
@@ -292,6 +317,11 @@ vim.api.nvim_create_autocmd('VimEnter', {
 require 'custom.plugins.dracula'
 require 'custom.plugins.nvim-material-icon'
 require 'custom.plugins.colorful-menu'
+
+-- ============================================================
+-- SECTION 3: UI / CORE UX PLUGINS
+-- colors, icons, indentation, which-key, todo-comments, and mini modules
+-- ============================================================
 
 pack.eager({ gh 'NMAC427/guess-indent.nvim' }, function() require('guess-indent').setup {} end)
 
@@ -321,6 +351,11 @@ pack.on_event(
     }
   end
 )
+
+-- ============================================================
+-- SECTION 5: LSP
+-- LSP keymaps and server configuration. Tools are installed outside this config.
+-- ============================================================
 
 -- LSP Plugins
 pack.eager({ gh 'neovim/nvim-lspconfig' }, function()
@@ -535,6 +570,11 @@ pack.eager({ gh 'neovim/nvim-lspconfig' }, function()
   end
 end)
 
+-- ============================================================
+-- SECTION 7: AUTOCOMPLETE & SNIPPETS
+-- blink.cmp, LuaSnip, and Lua plugin development helpers
+-- ============================================================
+
 pack.eager({
   { src = gh 'L3MON4D3/LuaSnip', version = vim.version.range '2' },
   { src = gh 'saghen/blink.cmp', version = vim.version.range '1' },
@@ -628,6 +668,8 @@ pack.eager({
   }
 end)
 
+-- SECTION 3 continued: UI / CORE UX PLUGINS
+
 -- Highlight todo, notes, etc in comments
 pack.eager({
   gh 'nvim-lua/plenary.nvim',
@@ -704,6 +746,11 @@ pack.eager({ gh 'nvim-mini/mini.nvim' }, function()
   -- ... and there is more!
   --  Check out: https://github.com/nvim-mini/mini.nvim
 end)
+
+-- ============================================================
+-- SECTION 8: TREESITTER
+-- Syntax highlighting, parser management, indentation, and folds
+-- ============================================================
 
 pack.build('nvim-treesitter', ':TSUpdate')
 pack.eager({ { src = gh 'nvim-treesitter/nvim-treesitter', version = 'main' } }, function()
@@ -796,12 +843,22 @@ pack.eager({ { src = gh 'nvim-treesitter/nvim-treesitter', version = 'main' } },
   })
 end)
 
+-- ============================================================
+-- SECTION 4: SEARCH & NAVIGATION
+-- Local picker, diagnostics, Git hunk, and navigation integrations
+-- ============================================================
+
 require 'custom.plugins.snacks'
 require 'custom.plugins.trouble'
 require('custom.git_hunks').setup()
 
 require 'kickstart.plugins.debug'
 require 'kickstart.plugins.lint'
+
+-- ============================================================
+-- SECTION 6: FORMATTING
+-- Local formatting and project-tool integrations
+-- ============================================================
 
 require 'custom.plugins.aerial'
 require 'custom.plugins.amp'
@@ -841,6 +898,11 @@ require 'custom.plugins.typescript-tools'
 require 'custom.plugins.uv'
 require 'custom.plugins.yazi'
 require 'custom.plugins.yazelix'
+
+-- ============================================================
+-- SECTION 9: OPTIONAL EXAMPLES / NEXT STEPS
+-- Additional local plugins are loaded explicitly above so ordering stays visible.
+-- ============================================================
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
