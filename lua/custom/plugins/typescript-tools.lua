@@ -1,4 +1,1 @@
-return {
-  'pmizio/typescript-tools.nvim',
-  enabled = false,
-}
+-- Intentionally disabled. vtsls handles TypeScript/JavaScript.

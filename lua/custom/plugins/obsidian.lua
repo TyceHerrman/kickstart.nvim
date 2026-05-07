@@ -1,16 +1,20 @@
-return {
-  "obsidian-nvim/obsidian.nvim",
-  version = "*", -- use latest release, remove to use latest commit
-  ft = "markdown",
-  ---@module 'obsidian'
-  ---@type obsidian.config
-  opts = {
-    legacy_commands = false, -- this will be removed in the next major release
-    workspaces = {
-      {
-        name = "personal",
-        path = "~/obsidian/Obsidian Vault",
-      },
-    },
+local pack = require 'custom.pack'
+
+pack.on_ft(
+  'markdown',
+  'obsidian.nvim',
+  {
+    pack.gh 'obsidian-nvim/obsidian.nvim',
   },
-}
+  function()
+    require('obsidian').setup {
+      legacy_commands = false,
+      workspaces = {
+        {
+          name = 'personal',
+          path = '~/obsidian/Obsidian Vault',
+        },
+      },
+    }
+  end
+)

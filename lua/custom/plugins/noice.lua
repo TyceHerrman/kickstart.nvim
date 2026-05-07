@@ -1,10 +1,10 @@
-return {
-  'folke/noice.nvim',
-  event = 'VeryLazy',
-  dependencies = {
-    'MunifTanjim/nui.nvim',
-  },
-  opts = {
+local pack = require 'custom.pack'
+
+pack.on_very_lazy('noice.nvim', {
+  pack.gh 'MunifTanjim/nui.nvim',
+  pack.gh 'folke/noice.nvim',
+}, function()
+  require('noice').setup {
     lsp = {
       -- override markdown rendering so that **cmp** and other plugins use **Treesitter**
       override = {
@@ -12,13 +12,12 @@ return {
         ['vim.lsp.util.stylize_markdown'] = true,
       },
     },
-    -- you can enable a preset for easier configuration
     presets = {
-      bottom_search = true, -- use a classic bottom cmdline for search
-      command_palette = true, -- position the cmdline and popupmenu together
-      long_message_to_split = true, -- long messages will be sent to a split
-      inc_rename = false, -- enables an input dialog for inc-rename.nvim
-      lsp_doc_border = false, -- add a border to hover docs and signature help
+      bottom_search = true,
+      command_palette = true,
+      long_message_to_split = true,
+      inc_rename = false,
+      lsp_doc_border = false,
     },
-  },
-}
+  }
+end)

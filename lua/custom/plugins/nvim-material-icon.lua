@@ -1,13 +1,11 @@
-return {
-  'DaikyXendo/nvim-material-icon',
-  dependencies = { 'nvim-tree/nvim-web-devicons' },
-  config = function()
-    require('nvim-web-devicons').setup {
-      -- globally enable default icons (default to false)
-      default = true,
-      -- globally enable "strict" selection of icons - icon will be looked up in
-      -- different tables, first by filename, and if not found by extension:
-      strict = true,
-    }
-  end,
-}
+local pack = require 'custom.pack'
+
+pack.eager({
+  pack.gh 'nvim-tree/nvim-web-devicons',
+  pack.gh 'DaikyXendo/nvim-material-icon',
+}, function()
+  require('nvim-web-devicons').setup {
+    default = true,
+    strict = true,
+  }
+end)

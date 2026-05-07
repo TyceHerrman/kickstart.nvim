@@ -1,7 +1,14 @@
-return {
-  'pwntester/octo.nvim',
-  cmd = 'Octo',
-  opts = {
+local pack = require 'custom.pack'
+
+local specs = {
+  pack.gh 'nvim-lua/plenary.nvim',
+  pack.gh 'folke/snacks.nvim',
+  pack.gh 'nvim-tree/nvim-web-devicons',
+  pack.gh 'pwntester/octo.nvim',
+}
+
+local function setup()
+  require('octo').setup {
     picker = 'snacks',
     enable_builtin = true,
     use_local_fs = true,
@@ -32,21 +39,20 @@ return {
       dark_blue = '#6272A4',
       purple = '#BD93F9',
     },
+  }
+end
+
+local load = pack.lazy('octo.nvim', specs, setup)
+
+pack.on_cmd('Octo', 'octo.nvim', specs, setup)
+pack.keymaps({
+  { '<leader>oi', '<cmd>Octo issue list<CR>', desc = 'List GitHub Issues' },
+  { '<leader>op', '<cmd>Octo pr list<CR>', desc = 'List GitHub Pull Requests' },
+  { '<leader>od', '<cmd>Octo discussion list<CR>', desc = 'List GitHub Discussions' },
+  { '<leader>on', '<cmd>Octo notification list<CR>', desc = 'List GitHub Notifications' },
+  {
+    '<leader>os',
+    function() require('octo.utils').create_base_search_command { include_current_repo = true } end,
+    desc = 'Search GitHub',
   },
-  keys = {
-    { '<leader>oi', '<cmd>Octo issue list<CR>', desc = 'List GitHub Issues' },
-    { '<leader>op', '<cmd>Octo pr list<CR>', desc = 'List GitHub Pull Requests' },
-    { '<leader>od', '<cmd>Octo discussion list<CR>', desc = 'List GitHub Discussions' },
-    { '<leader>on', '<cmd>Octo notification list<CR>', desc = 'List GitHub Notifications' },
-    {
-      '<leader>os',
-      function() require('octo.utils').create_base_search_command { include_current_repo = true } end,
-      desc = 'Search GitHub',
-    },
-  },
-  dependencies = {
-    'nvim-lua/plenary.nvim',
-    'folke/snacks.nvim',
-    'nvim-tree/nvim-web-devicons',
-  },
-}
+}, load)

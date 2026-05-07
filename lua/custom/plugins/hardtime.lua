@@ -1,11 +1,13 @@
-return {
-   "m4xshen/hardtime.nvim",
-   lazy = false,
-   dependencies = { "MunifTanjim/nui.nvim" },
-   opts = {
-      restricted_keys = {
-         ["j"] = false,
-         ["k"] = false,
-      },
-   },
-}
+local pack = require 'custom.pack'
+
+pack.eager({
+  pack.gh 'MunifTanjim/nui.nvim',
+  pack.gh 'm4xshen/hardtime.nvim',
+}, function()
+  require('hardtime').setup {
+    restricted_keys = {
+      j = false,
+      k = false,
+    },
+  }
+end)
