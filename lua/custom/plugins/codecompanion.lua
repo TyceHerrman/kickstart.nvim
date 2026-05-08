@@ -1,6 +1,10 @@
 local pack = require 'custom.pack'
 
 pack.eager({
+  -- Upstream plenary removal tracking:
+  --   Discussions: https://github.com/olimorris/codecompanion.nvim/discussions/3027
+  --                https://github.com/olimorris/codecompanion.nvim/discussions/3016
+  --   Partial PR: https://github.com/olimorris/codecompanion.nvim/pull/1642
   pack.gh 'nvim-lua/plenary.nvim',
   pack.gh 'nvim-treesitter/nvim-treesitter',
   pack.gh 'olimorris/codecompanion.nvim',

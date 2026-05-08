@@ -1,6 +1,9 @@
 local pack = require 'custom.pack'
 
 local specs = {
+  -- Upstream plenary removal tracking:
+  --   Issue: https://github.com/pwntester/octo.nvim/issues/909
+  --   Discussion: https://github.com/pwntester/octo.nvim/discussions/876
   pack.gh 'nvim-lua/plenary.nvim',
   pack.gh 'folke/snacks.nvim',
   pack.gh 'nvim-tree/nvim-web-devicons',

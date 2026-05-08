@@ -2,6 +2,8 @@ local pack = require 'custom.pack'
 
 local specs = {
   pack.gh 'nvim-neotest/nvim-nio',
+  -- Upstream plenary tracking:
+  --   Issue: https://github.com/nvim-neotest/neotest/issues/502
   pack.gh 'nvim-lua/plenary.nvim',
   pack.gh 'antoinemadec/FixCursorHold.nvim',
   pack.gh 'nvim-treesitter/nvim-treesitter',

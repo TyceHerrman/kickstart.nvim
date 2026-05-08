@@ -40,6 +40,8 @@ end
 vim.g.loaded_netrwPlugin = 1
 
 local specs = {
+  -- Upstream plenary removal tracking:
+  --   Issue: https://github.com/mikavilpas/yazi.nvim/issues/1050
   pack.gh 'nvim-lua/plenary.nvim',
   pack.gh 'mikavilpas/yazi.nvim',
 }

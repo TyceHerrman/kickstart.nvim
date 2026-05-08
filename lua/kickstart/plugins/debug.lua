@@ -78,7 +78,58 @@ pack.keymaps({
   { '<F2>', function() require('dap').step_over() end, desc = 'Debug: Step Over' },
   { '<F3>', function() require('dap').step_out() end, desc = 'Debug: Step Out' },
   { '<leader>b', function() require('dap').toggle_breakpoint() end, desc = 'Debug: Toggle Breakpoint' },
-  { '<leader>B', function() require('dap').set_breakpoint(vim.fn.input 'Breakpoint condition: ') end, desc = 'Debug: Set Breakpoint' },
+  {
+    '<leader>B',
+    function()
+      local dap = require 'dap'
+
+      ---@return dap.SourceBreakpoint
+      local function find_breakpoint()
+        local bufnr = vim.fn.bufnr()
+        local buf_breakpoints = require('dap.breakpoints').get(bufnr)[bufnr] or {}
+        for _, breakpoint in ipairs(buf_breakpoints) do
+          if breakpoint.line == vim.fn.line '.' then return breakpoint end
+        end
+
+        return { condition = '', hitCondition = '', logMessage = '', line = vim.fn.line '.' }
+      end
+
+      local breakpoint = find_breakpoint()
+      local fields = {
+        {
+          label = 'Condition',
+          get = function() return breakpoint.condition or '' end,
+          set = function(value) breakpoint.condition = value end,
+        },
+        {
+          label = 'Hit Condition',
+          get = function() return breakpoint.hitCondition or '' end,
+          set = function(value) breakpoint.hitCondition = value end,
+        },
+        {
+          label = 'Log Message',
+          get = function() return breakpoint.logMessage or '' end,
+          set = function(value) breakpoint.logMessage = value end,
+        },
+      }
+
+      vim.ui.select(fields, {
+        prompt = 'Edit Breakpoint',
+        format_item = function(item) return ('%s: %s'):format(item.label, item.get()) end,
+      }, function(choice)
+        if not choice then return end
+
+        local value = vim.fn.input({
+          prompt = ('[%s] '):format(choice.label),
+          default = choice.get(),
+        })
+
+        choice.set(value)
+        dap.set_breakpoint(breakpoint.condition, breakpoint.hitCondition, breakpoint.logMessage)
+      end)
+    end,
+    desc = 'Debug: Edit Breakpoint',
+  },
   {
     '<F7>',
     function() vim.cmd 'DapViewToggle' end,

@@ -334,10 +334,13 @@ pack.on_event(
       delay = 0,
       icons = { mappings = vim.g.have_nerd_font },
       spec = {
+        { '<leader>k', group = '[K]ill' },
         { '<leader>s', group = '[S]earch', mode = { 'n', 'v' } },
+        { '<leader>sr', group = 'Grug Far', mode = { 'n', 'v' } },
         { '<leader>t', group = '[T]est' },
         { '<leader>u', group = '[U]I/Toggle' },
         { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } },
+        { '<leader>x', group = 'Trouble' },
         { 'gr', group = 'LSP Actions', mode = { 'n' } },
         { 'a', group = 'Around textobject', mode = { 'x', 'o' } },
         { 'aF', desc = 'Around function definition', mode = { 'x', 'o' } },
@@ -672,35 +675,13 @@ end)
 
 -- Highlight todo, notes, etc in comments
 pack.eager({
+  -- Upstream plenary removal tracking:
+  --   PR: https://github.com/folke/todo-comments.nvim/pull/395
   gh 'nvim-lua/plenary.nvim',
   gh 'folke/todo-comments.nvim',
 }, function() require('todo-comments').setup { signs = false } end)
 
 pack.eager({ gh 'nvim-mini/mini.nvim' }, function()
-  -- Better Around/Inside textobjects
-  --
-  -- Examples:
-  --  - va)  - [V]isually select [A]round [)]paren
-  --  - yiiq - [Y]ank [I]nside next [Q]uote
-  --  - ci'  - [C]hange [I]nside [']quote
-  local spec_treesitter = require('mini.ai').gen_spec.treesitter
-  require('mini.ai').setup {
-    -- NOTE: Avoid conflicts with the built-in incremental selection mappings on Neovim>=0.12 (see `:help treesitter-incremental-selection`)
-    mappings = {
-      around_next = 'aa',
-      inside_next = 'ii',
-    },
-    n_lines = 500,
-    custom_textobjects = {
-      F = spec_treesitter { a = '@function.outer', i = '@function.inner' },
-      C = spec_treesitter { a = '@class.outer', i = '@class.inner' },
-      o = spec_treesitter {
-        a = { '@conditional.outer', '@loop.outer', '@block.outer' },
-        i = { '@conditional.inner', '@loop.inner', '@block.inner' },
-      },
-    },
-  }
-
   -- Add/delete/replace surroundings (brackets, quotes, etc.)
   --
   -- - saiw) - [S]urround [A]dd [I]nner [W]ord [)]Paren
@@ -758,13 +739,53 @@ pack.eager({ { src = gh 'nvim-treesitter/nvim-treesitter', version = 'main' } },
   local available_parsers = nvim_treesitter.get_available()
   local warned_languages = {}
   local ignored_filetypes = {
+    aerial = true,
+    ['aerial-nav'] = true,
+    ['blink-cmp-documentation'] = true,
+    ['blink-cmp-dot-repeat'] = true,
     noice = true,
+    ['blink-cmp-menu'] = true,
+    ['blink-cmp-signature'] = true,
+    codecompanion_cli = true,
+    ['conform-info'] = true,
+    ['dap-float'] = true,
+    ['dap-repl'] = true,
+    ['dap-view'] = true,
+    ['dap-view-hover'] = true,
+    ['dap-view-term'] = true,
+    ['dropbar_menu_fzf'] = true,
+    dropbar_preview = true,
+    ['gitsigns-blame'] = true,
+    ['graphql-schema'] = true,
+    ['grip-welcome'] = true,
+    grip_er = true,
+    grip_schema = true,
+    image = true,
+    image_nvim = true,
+    image_nvim_popup = true,
+    lazy_backdrop = true,
+    minimap = true,
+    ['neotest-output-panel'] = true,
+    ['neotest-summary'] = true,
+    octo_panel = true,
+    snacks_dashboard = true,
+    snacks_input = true,
+    snacks_layout_box = true,
     snacks_notif = true,
     snacks_notif_history = true,
-    ['blink-cmp-menu'] = true,
-    ['blink-cmp-documentation'] = true,
-    ['blink-cmp-signature'] = true,
+    snacks_picker_input = true,
+    snacks_picker_list = true,
+    snacks_picker_preview = true,
+    snacks_terminal = true,
+    snacks_win_backdrop = true,
+    snacks_win_help = true,
+    trouble = true,
+    wk = true,
+    yazi = true,
   }
+
+  -- Octo issue/PR buffers are Markdown content behind a custom filetype.
+  vim.treesitter.language.register('markdown', 'octo')
 
   local function managed_parser_path(language) return vim.fs.joinpath(vim.fn.stdpath 'data', 'site', 'parser', language .. '.so') end
 
@@ -889,7 +910,6 @@ require 'custom.plugins.smart-motion'
 require 'custom.plugins.splitjoin'
 require 'custom.plugins.todo-comments'
 require 'custom.plugins.treejs'
-require 'custom.plugins.treesitter-textobjects'
 require 'custom.plugins.treewalker'
 require 'custom.plugins.ts-comments'
 require 'custom.plugins.ts-error-translator'

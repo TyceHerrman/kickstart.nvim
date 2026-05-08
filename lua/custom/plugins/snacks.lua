@@ -413,12 +413,12 @@ local keys = {
     desc = 'Notification History',
   },
   {
-    '<leader>bd',
+    '<leader>kb',
     function() Snacks.bufdelete() end,
     desc = 'Delete Buffer',
   },
   {
-    '<leader>cR',
+    '<leader>R',
     function() Snacks.rename.rename_file() end,
     desc = 'Rename File',
   },

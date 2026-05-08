@@ -2,7 +2,7 @@ local pack = require 'custom.pack'
 
 local specs = {
   pack.gh 'saghen/blink.download',
-  pack.gh 'saghen/blink.pairs',
+  { src = pack.gh 'saghen/blink.pairs', version = vim.version.range '0' },
 }
 
 local function setup()
