@@ -2,7 +2,6 @@ local pack = require 'custom.pack'
 
 local specs = {
   pack.gh 'nvim-treesitter/nvim-treesitter',
-  pack.gh 'nvim-tree/nvim-web-devicons',
   pack.gh 'stevearc/aerial.nvim',
 }
 

@@ -1,6 +1,6 @@
 local pack = require 'custom.pack'
 
-pack.eager({ { src = '/Users/tyceherrman/GitHub/forks/colorful-menu.nvim', name = 'colorful-menu.nvim' } }, function()
+pack.eager({ pack.gh 'xzbdmw/colorful-menu.nvim' }, function()
   require('colorful-menu').setup {
     -- Only vtsls has dedicated colorful-menu formatting in this config.
     -- emmylua_ls, vue_ls, and dockerls intentionally use fallback highlighting.

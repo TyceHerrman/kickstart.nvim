@@ -1,9 +1,15 @@
 local pack = require 'custom.pack'
 
 local specs = {
-  pack.gh 'saghen/blink.download',
-  { src = pack.gh 'saghen/blink.pairs', version = vim.version.range '0' },
+  pack.gh 'saghen/blink.lib',
+  { src = pack.gh 'saghen/blink.pairs', version = vim.version.range '*' },
 }
+
+pack.build('blink.pairs', function()
+  pcall(vim.cmd.packadd, 'blink.lib')
+  pcall(vim.cmd.packadd, 'blink.pairs')
+  require('blink.pairs').build():pwait(120000)
+end)
 
 local function setup()
   vim.api.nvim_set_hl(0, 'BlinkPairsOrange', { fg = '#FFB86C' })

@@ -8,5 +8,6 @@ spell/
 .DS_Store
 .serena/
 settings.local.json
+.ai/issue-drafts/
 nvim.log
 docs/

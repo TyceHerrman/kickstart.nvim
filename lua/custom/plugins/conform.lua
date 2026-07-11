@@ -6,7 +6,6 @@ local function setup()
   require('conform').setup {
     notify_on_error = false,
     formatters_by_ft = {
-      lua = { 'stylua' },
       markdown = { 'rumdl' },
       python = { 'ruff_format' },
       javascript = { 'biome' },
@@ -21,7 +20,7 @@ local function setup()
 
       return {
         timeout_ms = 500,
-        lsp_format = 'fallback',
+        lsp_format = vim.bo[bufnr].filetype == 'lua' and 'prefer' or 'fallback',
       }
     end,
     formatters = {
@@ -83,7 +82,12 @@ pack.on_cmd('ConformInfo', 'conform.nvim', specs, setup)
 pack.keymaps({
   {
     '<leader>f',
-    function() require('conform').format { async = true, lsp_format = 'fallback' } end,
+    function()
+      require('conform').format {
+        async = true,
+        lsp_format = vim.bo.filetype == 'lua' and 'prefer' or 'fallback',
+      }
+    end,
     mode = '',
     desc = '[F]ormat buffer',
   },

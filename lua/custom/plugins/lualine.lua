@@ -1,7 +1,9 @@
 local pack = require 'custom.pack'
 
 pack.eager({
-  pack.gh 'nvim-tree/nvim-web-devicons',
+  -- lualine native mini.icons support tracking:
+  --   https://github.com/nvim-lualine/lualine.nvim/pull/1428
+  pack.gh 'DaikyXendo/nvim-material-icon',
   pack.gh 'nvim-lualine/lualine.nvim',
 }, function()
   vim.opt.showmode = false

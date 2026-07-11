@@ -2,8 +2,8 @@ local pack = require 'custom.pack'
 
 pack.eager({ { src = pack.gh 'sourcegraph/amp.nvim', version = 'main' } }, function()
   require('amp').setup {
-    -- Topgrade headless runs must not auto-start background services.
-    auto_start = not vim.g.is_topgrade_update,
+    -- Headless runs must not auto-start background services.
+    auto_start = #vim.api.nvim_list_uis() > 0,
     log_level = 'info',
   }
 end)

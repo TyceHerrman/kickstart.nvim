@@ -209,6 +209,19 @@ local function parse_blame(lines)
   return string.format('%s %s %s - %s', short_hash, author, date, summary)
 end
 
+local function has_haunt_annotation(buf, line)
+  local haunt_ns = vim.api.nvim_get_namespaces().haunt
+  if haunt_ns == nil then return false end
+
+  local marks = vim.api.nvim_buf_get_extmarks(buf, haunt_ns, { line - 1, 0 }, { line - 1, -1 }, { details = true })
+  for _, mark in ipairs(marks) do
+    local details = mark[4]
+    if details and details.virt_text then return true end
+  end
+
+  return false
+end
+
 local function update_line_blame(buf)
   if not blame_enabled[buf] or not vim.api.nvim_buf_is_valid(buf) then return end
 
@@ -221,16 +234,25 @@ local function update_line_blame(buf)
   if root == nil then return end
 
   local line = vim.api.nvim_win_get_cursor(0)[1]
+  local has_visible_haunt_note = has_haunt_annotation(buf, line)
+
   local lines = vim.fn.systemlist { 'git', '-C', root, 'blame', '-L', line .. ',' .. line, '--porcelain', '--', relpath(root, file) }
   if vim.v.shell_error ~= 0 then return end
 
   local blame = parse_blame(lines)
   if blame == nil then return end
 
-  vim.api.nvim_buf_set_extmark(buf, blame_ns, line - 1, 0, {
-    virt_text = { { '  ' .. blame, 'Comment' } },
-    virt_text_pos = 'eol',
-  })
+  if has_visible_haunt_note then
+    vim.api.nvim_buf_set_extmark(buf, blame_ns, line - 1, 0, {
+      virt_lines = { { { '  ' .. blame, 'Comment' } } },
+      virt_lines_above = false,
+    })
+  else
+    vim.api.nvim_buf_set_extmark(buf, blame_ns, line - 1, 0, {
+      virt_text = { { '  ' .. blame, 'Comment' } },
+      virt_text_pos = 'eol_right_align',
+    })
+  end
 end
 
 local function schedule_line_blame(buf)

@@ -248,15 +248,6 @@ vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper win
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
 
--- Highlight when yanking (copying) text
---  Try it with `yap` in normal mode
---  See `:help vim.hl.on_yank()`
-vim.api.nvim_create_autocmd('TextYankPost', {
-  desc = 'Highlight when yanking (copying) text',
-  group = vim.api.nvim_create_augroup('kickstart-highlight-yank', { clear = true }),
-  callback = function() vim.hl.on_yank() end,
-})
-
 -- Custom line number colors (Dracula dark_fg grey with green cursor line)
 vim.api.nvim_create_autocmd('ColorScheme', {
   desc = 'Custom line number colors',
@@ -284,11 +275,6 @@ vim.api.nvim_create_autocmd('User', {
   end,
 })
 
-local topgrade = require 'custom.topgrade'
-vim.g.is_topgrade_update = topgrade.is_update_session()
-
-if vim.g.is_topgrade_update then topgrade.prepare_update_session() end
-
 -- ============================================================
 -- SECTION 2: PLUGIN MANAGER INTRO
 -- vim.pack setup, update hooks, and local helper imports
@@ -314,6 +300,11 @@ vim.api.nvim_create_autocmd('VimEnter', {
   end,
 })
 
+if vim.g.vscode then
+  require 'custom.plugins.vscode'
+  return
+end
+
 require 'custom.plugins.dracula'
 require 'custom.plugins.nvim-material-icon'
 require 'custom.plugins.colorful-menu'
@@ -333,6 +324,11 @@ pack.on_event(
     require('which-key').setup {
       delay = 0,
       icons = { mappings = vim.g.have_nerd_font },
+      triggers = {
+        { '<auto>', mode = 'nixsotc' },
+        { 'g', mode = { 'n', 'x', 'o' } },
+        { 's', mode = { 'n', 'x', 'o' } },
+      },
       spec = {
         { '<leader>k', group = '[K]ill' },
         { '<leader>s', group = '[S]earch', mode = { 'n', 'v' } },
@@ -340,6 +336,12 @@ pack.on_event(
         { '<leader>t', group = '[T]est' },
         { '<leader>u', group = '[U]I/Toggle' },
         { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } },
+        { '<leader>gv', group = 'CodeDiff Review', mode = { 'n', 'v' } },
+        { '<leader>j', group = '[J]obs' },
+        { '<leader>m', group = '[M]arks/Bookmarks' },
+        { '<leader>mc', group = '[M]ulti[C]ursor', mode = { 'n', 'v' } },
+        { '<leader>mh', group = '[H]aunt' },
+        { '<leader>ms', group = '[S]pelunk' },
         { '<leader>x', group = 'Trouble' },
         { 'gr', group = 'LSP Actions', mode = { 'n' } },
         { 'a', group = 'Around textobject', mode = { 'x', 'o' } },
@@ -499,6 +501,7 @@ pack.eager({ gh 'neovim/nvim-lspconfig' }, function()
 
   ---@type table<string, vim.lsp.Config>
   local servers = {
+    nixd = {},
     -- TypeScript/JavaScript handled by vtsls (see vtsls entry below)
     vtsls = {
       filetypes = { 'typescript', 'javascript', 'typescriptreact', 'javascriptreact', 'vue' },
@@ -582,6 +585,7 @@ pack.eager({
   { src = gh 'L3MON4D3/LuaSnip', version = vim.version.range '2' },
   { src = gh 'saghen/blink.cmp', version = vim.version.range '1' },
   gh 'folke/lazydev.nvim',
+  gh 'onsails/lspkind.nvim',
 }, function()
   require('luasnip').setup {}
   require('lazydev').setup {
@@ -635,6 +639,24 @@ pack.eager({
         draw = {
           columns = { { 'kind_icon' }, { 'label', gap = 1 } },
           components = {
+            kind_icon = {
+              text = function(ctx)
+                if ctx.source_name ~= 'Path' then return (require('lspkind').symbol_map[ctx.kind] or '') .. ctx.icon_gap end
+
+                local is_unknown_type = vim.tbl_contains({ 'link', 'socket', 'fifo', 'char', 'block', 'unknown' }, ctx.item.data.type)
+                local mini_icon, _ = require('mini.icons').get(is_unknown_type and 'os' or ctx.item.data.type, is_unknown_type and '' or ctx.label)
+
+                return (mini_icon or ctx.kind_icon) .. ctx.icon_gap
+              end,
+              highlight = function(ctx)
+                if ctx.source_name ~= 'Path' then return ctx.kind_hl end
+
+                local is_unknown_type = vim.tbl_contains({ 'link', 'socket', 'fifo', 'char', 'block', 'unknown' }, ctx.item.data.type)
+                local mini_icon, mini_hl = require('mini.icons').get(is_unknown_type and 'os' or ctx.item.data.type, is_unknown_type and '' or ctx.label)
+
+                return mini_icon ~= nil and mini_hl or ctx.kind_hl
+              end,
+            },
             label = {
               text = function(ctx) return require('colorful-menu').blink_components_text(ctx) end,
               highlight = function(ctx) return require('colorful-menu').blink_components_highlight(ctx) end,
@@ -723,6 +745,13 @@ pack.eager({ gh 'nvim-mini/mini.nvim' }, function()
 
   require('mini.map').setup()
 
+  local hipatterns = require 'mini.hipatterns'
+  hipatterns.setup {
+    highlighters = {
+      hex_color = hipatterns.gen_highlighter.hex_color { style = 'inline' },
+    },
+  }
+
   require('mini.trailspace').setup()
   -- ... and there is more!
   --  Check out: https://github.com/nvim-mini/mini.nvim
@@ -736,58 +765,23 @@ end)
 pack.build('nvim-treesitter', ':TSUpdate')
 pack.eager({ { src = gh 'nvim-treesitter/nvim-treesitter', version = 'main' } }, function()
   local nvim_treesitter = require 'nvim-treesitter'
+  local treesitter_install_dir = vim.fs.joinpath(vim.fn.stdpath 'data', 'site')
+  nvim_treesitter.setup { install_dir = treesitter_install_dir }
+
+  local treesitter_source = debug.getinfo(nvim_treesitter.setup, 'S').source:sub(2)
+  local treesitter_runtime = vim.fs.joinpath(vim.fs.dirname(vim.fs.dirname(vim.fs.dirname(treesitter_source))), 'runtime')
+  if vim.uv.fs_stat(treesitter_runtime) and not vim.tbl_contains(vim.opt.runtimepath:get(), treesitter_runtime) then
+    vim.opt.runtimepath:prepend(treesitter_runtime)
+  end
+
   local available_parsers = nvim_treesitter.get_available()
+  local ui_filetypes = require 'custom.ui_filetypes'
   local warned_languages = {}
-  local ignored_filetypes = {
-    aerial = true,
-    ['aerial-nav'] = true,
-    ['blink-cmp-documentation'] = true,
-    ['blink-cmp-dot-repeat'] = true,
-    noice = true,
-    ['blink-cmp-menu'] = true,
-    ['blink-cmp-signature'] = true,
-    codecompanion_cli = true,
-    ['conform-info'] = true,
-    ['dap-float'] = true,
-    ['dap-repl'] = true,
-    ['dap-view'] = true,
-    ['dap-view-hover'] = true,
-    ['dap-view-term'] = true,
-    ['dropbar_menu_fzf'] = true,
-    dropbar_preview = true,
-    ['gitsigns-blame'] = true,
-    ['graphql-schema'] = true,
-    ['grip-welcome'] = true,
-    grip_er = true,
-    grip_schema = true,
-    image = true,
-    image_nvim = true,
-    image_nvim_popup = true,
-    lazy_backdrop = true,
-    minimap = true,
-    ['neotest-output-panel'] = true,
-    ['neotest-summary'] = true,
-    octo_panel = true,
-    snacks_dashboard = true,
-    snacks_input = true,
-    snacks_layout_box = true,
-    snacks_notif = true,
-    snacks_notif_history = true,
-    snacks_picker_input = true,
-    snacks_picker_list = true,
-    snacks_picker_preview = true,
-    snacks_terminal = true,
-    snacks_win_backdrop = true,
-    snacks_win_help = true,
-    trouble = true,
-    wk = true,
-    yazi = true,
-  }
 
   -- Octo issue/PR buffers are Markdown content behind a custom filetype.
   vim.treesitter.language.register('markdown', 'octo')
 
-  local function managed_parser_path(language) return vim.fs.joinpath(vim.fn.stdpath 'data', 'site', 'parser', language .. '.so') end
+  local function managed_parser_path(language) return vim.fs.joinpath(treesitter_install_dir, 'parser', language .. '.so') end
 
   local function warn_missing_parser(language, message)
     if warned_languages[language] then return end
@@ -828,7 +822,7 @@ pack.eager({ { src = gh 'nvim-treesitter/nvim-treesitter', version = 'main' } },
       local buf, filetype = args.buf, args.match
 
       -- UI buffers manage their own rendering and should not trigger parser installs or warnings.
-      if ignored_filetypes[filetype] then return end
+      if ui_filetypes.should_skip_treesitter(buf, filetype) then return end
 
       local language = vim.treesitter.language.get_lang(filetype)
       if not language then return end
@@ -870,6 +864,9 @@ end)
 -- ============================================================
 
 require 'custom.plugins.snacks'
+require 'custom.plugins.codediff'
+require 'custom.plugins.yanky'
+require 'custom.plugins.auto-session'
 require 'custom.plugins.trouble'
 require('custom.git_hunks').setup()
 
@@ -892,23 +889,29 @@ require 'custom.plugins.dropbar'
 require 'custom.plugins.eslint'
 require 'custom.plugins.grug-far'
 require 'custom.plugins.hardtime'
+require 'custom.plugins.haunt'
 require 'custom.plugins.helpview'
 require 'custom.plugins.image'
+require 'custom.plugins.kulala'
 require 'custom.plugins.lensline'
 require 'custom.plugins.lualine'
 require 'custom.plugins.markview'
+require 'custom.plugins.multicursor'
 require 'custom.plugins.neoscroll'
 require 'custom.plugins.neotest'
 require 'custom.plugins.noice'
 require 'custom.plugins.obsidian'
 require 'custom.plugins.octo'
+require 'custom.plugins.overseer'
 require 'custom.plugins.origami'
 require 'custom.plugins.otter'
 require 'custom.plugins.pretty-ts-errors'
 require 'custom.plugins.rulebook'
 require 'custom.plugins.smart-motion'
+require 'custom.plugins.spelunk'
 require 'custom.plugins.splitjoin'
 require 'custom.plugins.todo-comments'
+require 'custom.plugins.treesitter-context'
 require 'custom.plugins.treejs'
 require 'custom.plugins.treewalker'
 require 'custom.plugins.ts-comments'

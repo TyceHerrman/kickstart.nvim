@@ -6,8 +6,68 @@ local opts = {
   -- Core Features
   -- ═══════════════════════════════════════════════════════════
   bigfile = { enabled = true },
-  -- Topgrade headless runs must not wait on dashboard startup behavior.
-  dashboard = { enabled = not vim.g.is_topgrade_update and not vim.tbl_contains(vim.v.argv, '--listen') },
+  dashboard = {
+    enabled = not vim.tbl_contains(vim.v.argv, '--listen'),
+    -- Omit Snacks' default startup section: it depends on lazy.nvim's lazy.stats.
+    preset = {
+      keys = {
+        { icon = ' ', key = 'f', desc = 'Find File', action = ":lua Snacks.dashboard.pick('files')" },
+        { icon = ' ', key = 'n', desc = 'New File', action = ':ene | startinsert' },
+        { icon = ' ', key = 'g', desc = 'Find Text', action = ":lua Snacks.dashboard.pick('live_grep')" },
+        { icon = ' ', key = 'r', desc = 'Recent Files', action = ":lua Snacks.dashboard.pick('oldfiles')" },
+        { icon = ' ', key = 'c', desc = 'Config', action = ":lua Snacks.dashboard.pick('files', {cwd = vim.fn.stdpath('config')})" },
+        { icon = ' ', key = 's', desc = 'Sessions', action = ':AutoSession search', enabled = function() return vim.fn.exists ':AutoSession' == 2 end },
+        { icon = '󰆓 ', key = 'S', desc = 'Save Session', action = ':AutoSession save', enabled = function() return vim.fn.exists ':AutoSession' == 2 end },
+        {
+          icon = '󰔛 ',
+          key = 'a',
+          desc = 'Toggle Autosave',
+          action = ':AutoSession toggle',
+          enabled = function() return vim.fn.exists ':AutoSession' == 2 end,
+        },
+        { icon = ' ', key = 'q', desc = 'Quit', action = ':qa' },
+      },
+    },
+    sections = {
+      { section = 'header' },
+      { section = 'keys', gap = 1, padding = 1 },
+      { icon = ' ', title = 'Recent Files', section = 'recent_files', indent = 2, padding = 1 },
+      { icon = ' ', title = 'Projects', section = 'projects', indent = 2, padding = 1 },
+      {
+        icon = '󰌪 ',
+        title = 'System',
+        section = 'terminal',
+        enabled = function() return vim.fn.executable 'fastfetch' == 1 end,
+        cmd = 'fastfetch --logo none --structure title:os:host:kernel:uptime:packages:shell:terminal:cpu:memory:battery',
+        height = 11,
+        indent = 2,
+        padding = 1,
+        ttl = 5 * 60,
+      },
+      {
+        icon = '󰯙 ',
+        title = 'Fortune',
+        section = 'terminal',
+        enabled = function() return vim.fn.executable 'fortune-kind' == 1 and vim.fn.executable 'cowsay' == 1 end,
+        cmd = [[fortune-kind -s | sh -c 'if cowsay --help 2>&1 | grep -q -- "--aurora"; then cowsay --random --aurora -W 54; else cowsay -W 54; fi']],
+        height = 8,
+        indent = 2,
+        padding = 1,
+        ttl = 60,
+      },
+      {
+        icon = '󰯙 ',
+        title = 'Fortune',
+        section = 'terminal',
+        enabled = function() return vim.fn.executable 'fortune-kind' == 1 and vim.fn.executable 'cowsay' ~= 1 end,
+        cmd = 'fortune-kind -s',
+        height = 4,
+        indent = 2,
+        padding = 1,
+        ttl = 60,
+      },
+    },
+  },
   explorer = { enabled = true }, -- File browser (use <leader>e, coexists with Yazi for different workflows)
 
   -- ═══════════════════════════════════════════════════════════
@@ -37,42 +97,6 @@ local opts = {
   -- ═══════════════════════════════════════════════════════════
   gh = {},
   picker = {
-    win = {
-      input = {
-        keys = {
-          ['<a-s>'] = { 'flash', mode = { 'n', 'i' } },
-          ['s'] = { 'flash' },
-        },
-      },
-    },
-    actions = {
-      flash = function(picker)
-        local ok, flash = pcall(require, 'flash')
-        if not ok then
-          vim.notify('Flash plugin not found', vim.log.levels.WARN)
-          return
-        end
-
-        local success, err = pcall(function()
-          flash.jump {
-            pattern = '^',
-            label = { after = { 0, 0 } },
-            search = {
-              mode = 'search',
-              exclude = {
-                function(win) return vim.bo[vim.api.nvim_win_get_buf(win)].filetype ~= 'snacks_picker_list' end,
-              },
-            },
-            action = function(match)
-              local idx = picker.list:row2idx(match.pos[1])
-              if idx then picker.list:_move(idx, true, true) end
-            end,
-          }
-        end)
-
-        if not success and err then vim.notify('Flash error: ' .. tostring(err), vim.log.levels.ERROR) end
-      end,
-    },
     sources = {
       gh_issue = {},
       gh_pr = {},
@@ -481,32 +505,6 @@ local keys = {
 }
 
 local function setup_extra()
-  local colors = {
-    '#ff79c6', -- Pink
-    '#8be9fd', -- Cyan
-    '#50fa7b', -- Green
-    '#f1fa8c', -- Yellow
-    '#bd93f9', -- Purple
-    '#ffb86c', -- Orange
-    '#ff5555', -- Red
-    '#6272a4', -- Comment (bluish-gray)
-  }
-
-  -- Create autocmd to set colors on colorscheme changes
-  vim.api.nvim_create_autocmd('ColorScheme', {
-    group = vim.api.nvim_create_augroup('SnacksIndentRainbow', { clear = true }),
-    callback = function()
-      for i, color in ipairs(colors) do
-        vim.api.nvim_set_hl(0, 'SnacksIndent' .. i, { fg = color })
-      end
-    end,
-  })
-
-  -- Set colors immediately
-  for i, color in ipairs(colors) do
-    vim.api.nvim_set_hl(0, 'SnacksIndent' .. i, { fg = color })
-  end
-
   vim.api.nvim_create_autocmd('User', {
     pattern = 'VeryLazy',
     callback = function()
