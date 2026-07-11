@@ -15,7 +15,7 @@ local opts = {
         { icon = ' ', key = 'n', desc = 'New File', action = ':ene | startinsert' },
         { icon = ' ', key = 'g', desc = 'Find Text', action = ":lua Snacks.dashboard.pick('live_grep')" },
         { icon = ' ', key = 'r', desc = 'Recent Files', action = ":lua Snacks.dashboard.pick('oldfiles')" },
-        { icon = ' ', key = 'c', desc = 'Config', action = ":lua Snacks.dashboard.pick('files', {cwd = vim.fn.stdpath('config')})" },
+        { icon = ' ', key = 'c', desc = 'Config', action = ":lua Snacks.dashboard.pick('files', {cwd = vim.fn.stdpath('config'), follow = true})" },
         { icon = ' ', key = 's', desc = 'Sessions', action = ':AutoSession search', enabled = function() return vim.fn.exists ':AutoSession' == 2 end },
         { icon = '󰆓 ', key = 'S', desc = 'Save Session', action = ':AutoSession save', enabled = function() return vim.fn.exists ':AutoSession' == 2 end },
         {
@@ -165,7 +165,7 @@ local keys = {
   },
   {
     '<leader>fc',
-    function() Snacks.picker.files { cwd = vim.fn.stdpath 'config' } end,
+    function() Snacks.picker.files { cwd = vim.fn.stdpath 'config', follow = true } end,
     desc = 'Find Config File',
   },
   {

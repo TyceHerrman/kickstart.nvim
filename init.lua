@@ -85,8 +85,8 @@ P.S. You can delete this when you're done too. It's your config now! :)
 --]]
 
 -- ============================================================
--- SECTION 1: FOUNDATION
--- Core Neovim settings, leaders, options, basic keymaps, basic autocmds
+-- SECTION 1: OPTIONS
+-- Core Neovim settings, leaders, and options
 -- ============================================================
 
 -- Enable faster startup by caching compiled Lua modules
@@ -180,6 +180,11 @@ vim.o.scrolloff = 10
 -- instead raise a dialog asking if you wish to save the current file(s)
 -- See `:help 'confirm'`
 vim.o.confirm = true
+
+-- ============================================================
+-- SECTION 2: KEYMAPS
+-- Basic keymaps, diagnostics, and related autocmds
+-- ============================================================
 
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
@@ -276,7 +281,7 @@ vim.api.nvim_create_autocmd('User', {
 })
 
 -- ============================================================
--- SECTION 2: PLUGIN MANAGER INTRO
+-- SECTION 3: PLUGIN MANAGER INTRO
 -- vim.pack setup, update hooks, and local helper imports
 -- ============================================================
 
@@ -310,7 +315,7 @@ require 'custom.plugins.nvim-material-icon'
 require 'custom.plugins.colorful-menu'
 
 -- ============================================================
--- SECTION 3: UI / CORE UX PLUGINS
+-- SECTION 4: UI / CORE UX PLUGINS
 -- colors, icons, indentation, which-key, todo-comments, and mini modules
 -- ============================================================
 
@@ -358,7 +363,7 @@ pack.on_event(
 )
 
 -- ============================================================
--- SECTION 5: LSP
+-- SECTION 6: LSP
 -- LSP keymaps and server configuration. Tools are installed outside this config.
 -- ============================================================
 
@@ -577,7 +582,7 @@ pack.eager({ gh 'neovim/nvim-lspconfig' }, function()
 end)
 
 -- ============================================================
--- SECTION 7: AUTOCOMPLETE & SNIPPETS
+-- SECTION 8: AUTOCOMPLETE & SNIPPETS
 -- blink.cmp, LuaSnip, and Lua plugin development helpers
 -- ============================================================
 
@@ -693,7 +698,7 @@ pack.eager({
   }
 end)
 
--- SECTION 3 continued: UI / CORE UX PLUGINS
+-- SECTION 4 continued: UI / CORE UX PLUGINS
 
 -- Highlight todo, notes, etc in comments
 pack.eager({
@@ -758,7 +763,7 @@ pack.eager({ gh 'nvim-mini/mini.nvim' }, function()
 end)
 
 -- ============================================================
--- SECTION 8: TREESITTER
+-- SECTION 9: TREESITTER
 -- Syntax highlighting, parser management, indentation, and folds
 -- ============================================================
 
@@ -859,7 +864,7 @@ pack.eager({ { src = gh 'nvim-treesitter/nvim-treesitter', version = 'main' } },
 end)
 
 -- ============================================================
--- SECTION 4: SEARCH & NAVIGATION
+-- SECTION 5: SEARCH & NAVIGATION
 -- Local picker, diagnostics, Git hunk, and navigation integrations
 -- ============================================================
 
@@ -874,7 +879,7 @@ require 'kickstart.plugins.debug'
 require 'kickstart.plugins.lint'
 
 -- ============================================================
--- SECTION 6: FORMATTING
+-- SECTION 7: FORMATTING
 -- Local formatting and project-tool integrations
 -- ============================================================
 
@@ -923,7 +928,7 @@ require 'custom.plugins.yazi'
 require 'custom.plugins.yazelix'
 
 -- ============================================================
--- SECTION 9: OPTIONAL EXAMPLES / NEXT STEPS
+-- SECTION 10: OPTIONAL EXAMPLES / NEXT STEPS
 -- Additional local plugins are loaded explicitly above so ordering stays visible.
 -- ============================================================
 
