@@ -1,6 +1,6 @@
 local pack = require 'custom.pack'
 
-pack.eager({ pack.gh 'binhtran432k/dracula.nvim' }, function()
+pack.eager({ pack.gh 'AndresYague/dracula.nvim' }, function()
   local function apply_helpview_highlights()
     local links = {
       HelpviewPalette0Fg = 'Comment',

@@ -41,7 +41,7 @@
       "version": ">=0.0.0"
     },
     "codecompanion.nvim": {
-      "rev": "44de5603f252d3cd80ad4fb851e6484719fb20d1",
+      "rev": "b0680d12ae1a7fc1b20ab8c78b8c44b34e72e245",
       "src": "https://github.com/olimorris/codecompanion.nvim"
     },
     "codediff.nvim": {
@@ -61,15 +61,15 @@
       "src": "https://github.com/joryeugene/dadbod-grip.nvim"
     },
     "dracula.nvim": {
-      "rev": "c3fe55bc0384f01581fe7f15ec28792eb3aa7c53",
-      "src": "https://github.com/binhtran432k/dracula.nvim"
+      "rev": "839dcca1fa33c1ce371645176f13bf0026e79ce6",
+      "src": "https://github.com/AndresYague/dracula.nvim"
     },
     "dropbar.nvim": {
       "rev": "808ba31cde89aec8833e9789f5e04557cd31c9e1",
       "src": "https://github.com/Bekaboo/dropbar.nvim"
     },
     "grug-far.nvim": {
-      "rev": "c69859c1d5427ab5fc7ed12380ab521b4e336691",
+      "rev": "1cc080f55706b38aabfa97d40acb6adf59ac4a5a",
       "src": "https://github.com/MagicDuck/grug-far.nvim"
     },
     "guess-indent.nvim": {
@@ -93,7 +93,7 @@
       "src": "https://github.com/3rd/image.nvim"
     },
     "kulala.nvim": {
-      "rev": "91cf892008c773ce74ac392c4c12ddff775b7619",
+      "rev": "a9e17ae0236e886371671a7a9f01f070201a9cc1",
       "src": "https://github.com/mistweaverco/kulala.nvim"
     },
     "lazydev.nvim": {
@@ -114,11 +114,11 @@
       "src": "https://github.com/nvim-lualine/lualine.nvim"
     },
     "markview.nvim": {
-      "rev": "41ecde17c96941fb5b7c97995a10712738e85efe",
+      "rev": "2471f4097f8561a6880a0fe05ee0f21cbc82b374",
       "src": "https://github.com/OXY2DEV/markview.nvim"
     },
     "mini.nvim": {
-      "rev": "fdc8b9701616863e44f7a7a0802cfe16bd866539",
+      "rev": "db41c4076105a63caec12612d11228348f55a109",
       "src": "https://github.com/nvim-mini/mini.nvim"
     },
     "mini.splitjoin": {
@@ -175,7 +175,7 @@
       "src": "https://github.com/mfussenegger/nvim-lint"
     },
     "nvim-lspconfig": {
-      "rev": "d224a1920728ba129880efc700d4a0180ac4ecbb",
+      "rev": "2c227d59589957fa4404b7de5f61d72c0a78a62d",
       "src": "https://github.com/neovim/nvim-lspconfig"
     },
     "nvim-material-icon": {
@@ -207,7 +207,7 @@
       "src": "https://github.com/nvim-treesitter/nvim-treesitter-context"
     },
     "obsidian.nvim": {
-      "rev": "7687c7e62c3e12617d9eea6401e9e1f190e2ccab",
+      "rev": "bf1616d46e72477ad978051363fdb5c839c1cce5",
       "src": "https://github.com/obsidian-nvim/obsidian.nvim"
     },
     "octo.nvim": {
@@ -283,7 +283,7 @@
       "src": "https://github.com/gbprod/yanky.nvim"
     },
     "yazi.nvim": {
-      "rev": "bba4c0579e4247729bf71b4104471eb131516922",
+      "rev": "d06c6c7a2e06f847963f5f14542feda1ca3872e0",
       "src": "https://github.com/mikavilpas/yazi.nvim"
     }
   }
