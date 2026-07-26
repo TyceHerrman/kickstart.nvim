@@ -86,7 +86,7 @@ P.S. You can delete this when you're done too. It's your config now! :)
 
 -- ============================================================
 -- SECTION 1: OPTIONS
--- Core Neovim settings, leaders, and options
+-- Core Neovim settings, leaders, options
 -- ============================================================
 
 -- Enable faster startup by caching compiled Lua modules
@@ -182,8 +182,8 @@ vim.o.scrolloff = 10
 vim.o.confirm = true
 
 -- ============================================================
--- SECTION 2: KEYMAPS
--- Basic keymaps, diagnostics, and related autocmds
+-- SECTION 2: KEYMAPS & AUTOCMDS
+-- basic keymaps, basic autocmds
 -- ============================================================
 
 -- [[ Basic Keymaps ]]
