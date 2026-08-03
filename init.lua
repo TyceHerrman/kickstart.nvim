@@ -563,6 +563,7 @@ pack.eager({ gh 'neovim/nvim-lspconfig' }, function()
       },
     },
     emmylua_ls = {},
+    tombi = {},
     -- clangd = {},
     -- gopls = {},
     -- pyright = {},
