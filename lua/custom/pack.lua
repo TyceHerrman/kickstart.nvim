@@ -53,7 +53,8 @@ end
 
 function M.lazy(id, specs, setup)
   specs = as_list(specs)
-  M.add(specs, { load = false })
+  -- `load = false` acts like `:packadd!`, exposing plugin files to startup sourcing.
+  M.add(specs, { load = function() end })
 
   return function()
     if loaded[id] then return end

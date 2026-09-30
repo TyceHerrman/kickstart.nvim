@@ -96,6 +96,11 @@ local function setup()
         unstaged = true,
         conflicts = true,
       },
+      line_stats = {
+        enabled = true,
+        count_untracked = true,
+        max_untracked_bytes = 1024 * 1024,
+      },
     },
     history = {
       position = 'bottom',
@@ -179,16 +184,13 @@ end
 local load = pack.lazy('codediff.nvim', specs, setup)
 local loaded = vim.g.loaded_codediff == 1 and vim.fn.exists ':CodeDiff' == 2
 
+if loaded then setup() end
+
 local function load_codediff()
   if loaded then return end
-  if vim.g.loaded_codediff == 1 and vim.fn.exists ':CodeDiff' == 2 then
-    loaded = true
-    return
-  end
 
   pcall(vim.api.nvim_del_user_command, 'CodeDiff')
   load()
-  vim.cmd.runtime 'plugin/codediff.lua'
   loaded = true
 end
 

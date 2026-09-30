@@ -1,34 +1,23 @@
 local pack = require 'custom.pack'
 
-local function quickfix_items()
-  local qf = vim.fn.getqflist { items = 0, title = 0 }
-  local items = {}
+local function save_quickfix_cmds()
+  local qflist = vim.fn.getqflist()
+  if vim.tbl_isempty(qflist) then return nil end
 
-  for _, item in ipairs(qf.items or {}) do
-    local filename = item.filename
-    if (not filename or filename == '') and item.bufnr and item.bufnr > 0 then
-      local ok, name = pcall(vim.api.nvim_buf_get_name, item.bufnr)
-      if ok and name ~= '' then filename = name end
+  local qfinfo = vim.fn.getqflist { title = 1 }
+  for _, entry in ipairs(qflist) do
+    local bufnr = entry.bufnr
+    if type(bufnr) == 'number' and bufnr > 0 and vim.api.nvim_buf_is_valid(bufnr) then
+      local filename = vim.api.nvim_buf_get_name(bufnr)
+      if filename ~= '' then entry.filename = filename end
     end
-
-    if filename and filename ~= '' then
-      table.insert(items, {
-        filename = filename,
-        lnum = item.lnum,
-        col = item.col,
-        text = item.text,
-        type = item.type,
-        nr = item.nr,
-        valid = item.valid,
-      })
-    end
+    entry.bufnr = nil
   end
 
-  if vim.tbl_isempty(items) then return nil end
-
   return {
-    title = qf.title,
-    items = items,
+    'call setqflist(' .. vim.fn.string(qflist) .. ')',
+    'call setqflist([], "a", ' .. vim.fn.string(qfinfo) .. ')',
+    'copen',
   }
 end
 
@@ -46,13 +35,19 @@ local function dap_breakpoints()
   return by_file
 end
 
+local function kulala_env()
+  local env = vim.g.kulala_selected_env
+  if type(env) ~= 'string' or env == '' then return nil end
+  return env
+end
+
 local function save_extra_data()
   local extra = {
     breakpoints = dap_breakpoints(),
-    quickfix = quickfix_items(),
+    kulala_env = kulala_env(),
   }
 
-  if not extra.breakpoints and not extra.quickfix then return nil end
+  if not extra.breakpoints and not extra.kulala_env then return nil end
   return vim.fn.json_encode(extra)
 end
 
@@ -74,21 +69,24 @@ local function restore_breakpoints(breakpoints_by_file)
   end
 end
 
-local function restore_quickfix(quickfix)
-  if type(quickfix) ~= 'table' or type(quickfix.items) ~= 'table' or vim.tbl_isempty(quickfix.items) then return end
+local function restore_kulala_env(env)
+  if type(env) ~= 'string' or env == '' then return end
 
-  vim.fn.setqflist({}, 'r', {
-    title = quickfix.title or 'AutoSession',
-    items = quickfix.items,
-  })
+  local kulala = package.loaded['kulala']
+  if type(kulala) == 'table' and type(kulala.set_selected_env) == 'function' then
+    local ok = pcall(kulala.set_selected_env, env)
+    if ok then return end
+  end
+
+  vim.g.kulala_selected_env = env
 end
 
 local function restore_extra_data(_, extra_data)
   local ok, extra = pcall(vim.fn.json_decode, extra_data)
   if not ok or type(extra) ~= 'table' then return end
 
-  restore_quickfix(extra.quickfix)
   restore_breakpoints(extra.breakpoints)
+  restore_kulala_env(extra.kulala_env)
 end
 
 local specs = { pack.gh 'rmagatti/auto-session' }
@@ -108,6 +106,7 @@ pack.eager(specs, function()
     suppressed_dirs = { '~/', '~/Downloads', '/' },
     bypass_save_filetypes = { 'snacks_dashboard', 'dashboard', 'alpha' },
     close_filetypes_on_save = { 'checkhealth', 'snacks_dashboard' },
+    save_extra_cmds = { save_quickfix_cmds },
     save_extra_data = save_extra_data,
     restore_extra_data = restore_extra_data,
     session_lens = {
