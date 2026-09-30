@@ -567,13 +567,13 @@ pack.eager({ gh 'neovim/nvim-lspconfig' }, function()
     -- clangd = {},
     -- gopls = {},
     -- pyright = {},
+    -- tsc = {},
+    --
+    -- Some languages (like rust) have entire language plugins that can be useful:
+    --    https://github.com/mrcjkb/rustaceanvim
+    --
+    -- But for many setups, the LSP (`rust_analyzer`) will work just fine
     -- rust_analyzer = {},
-    --
-    -- Some languages (like typescript) have entire language plugins that can be useful:
-    --    https://github.com/pmizio/typescript-tools.nvim
-    --
-    -- But for many setups, the LSP (`ts_ls`) will work just fine
-    -- ts_ls = {},
   }
 
   for name, server in pairs(servers) do
@@ -924,6 +924,7 @@ require 'custom.plugins.yazelix'
 -- ============================================================
 -- SECTION 10: OPTIONAL EXAMPLES / NEXT STEPS
 -- Additional local plugins are loaded explicitly above so ordering stays visible.
+-- Keep dependent modules in the required order; directory iteration order is unspecified.
 -- ============================================================
 
 -- The line beneath this is called `modeline`. See `:help modeline`
